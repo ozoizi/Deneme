@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cumhuriyet Bayramınız Kutlu Olsun</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+      color: #0f0;
+      font-family: monospace;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    .center-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #0f0;
+      font-size: 2.2em;
+      text-align: center;
+      text-shadow: 0 0 20px #0f0, 0 0 40px #0f0;
+      letter-spacing: 2px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrix"></canvas>
+  <div class="center-text">CUMHURİYET BAYRAMINIZ<br>KUTLU OLSUN</div>
+
+  <script>
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+
+    const letters = "CUMHURİYET BAYRAMIMIZ KUTLU OLSUN ".split("");
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+
+    const drops = [];
+    for (let x = 0; x < columns; x++) drops[x] = 1;
+
+    function draw() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#0f0";
+      ctx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters[Math.floor(Math.random() * letters.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975)
+          drops[i] = 0;
+        drops[i]++;
+      }
+    }
+
+    setInterval(draw, 150);
+    window.addEventListener("resize", () => {
+      canvas.height = window.innerHeight;
+      canvas.width = window.innerWidth;
+    });
+  </script>
+</body>
+</html>
