@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gerçekçi 3B Dünya</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: black; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <!-- Three.js kütüphanesi -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
+
+  <script>
+    // SAHNE, KAMERA, RENDERER
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // IŞIKLANDIRMA
+    const ambientLight = new THREE.AmbientLight(0x333333); // zayıf ortam ışığı
+    scene.add(ambientLight);
+
+    const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    sunLight.position.set(5, 3, 5);
+    scene.add(sunLight);
+
+    // DOKULAR
+    const loader = new THREE.TextureLoader();
+    const earthDayMap = loader.load("https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg");
+    const earthNightMap = loader.load("https://threejs.org/examples/textures/planets/earth_lights_2048.png");
+    const earthNormalMap = loader.load("https://threejs.org/examples/textures/planets/earth_normal_2048.jpg");
+    const earthSpecularMap = loader.load("https://threejs.org/examples/textures/planets/earth_specular_2048.jpg");
+    const cloudMap = loader.load("https://threejs.org/examples/textures/planets/earth_clouds_1024.png");
+    const starsMap = loader.load("https://threejs.org/examples/textures/planets/starfield.jpg");
+
+    // DÜNYA
+    const earthGeometry = new THREE.SphereGeometry(2, 64, 64);
+    const earthMaterial = new THREE.MeshPhongMaterial({
+      map: earthDayMap,
+      normalMap: earthNormalMap,
+      specularMap: earthSpecularMap,
+      specular: new THREE.Color('grey'),
+    });
+    const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+    scene.add(earth);
+
+    // GECE IŞIKLARI (yarı saydam katman)
+    const nightMaterial = new THREE.MeshBasicMaterial({
+      map: earthNightMap,
+      blending: THREE.AdditiveBlending,
+      transparent: true,
+      opacity: 0.8,
+    });
+    const earthNight = new THREE.Mesh(earthGeometry.clone(), nightMaterial);
+    scene.add(earthNight);
+
+    // BULUT KATMANI
+    const cloudGeometry = new THREE.SphereGeometry(2.03, 64, 64);
+    const cloudMaterial = new THREE.MeshPhongMaterial({
+      map: cloudMap,
+      transparent: true,
+      opacity: 0.4,
+      depthWrite: false,
+    });
+    const clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
+    scene.add(clouds);
+
+    // ATMOSFER PARLAMASI (mavi kenar efekti)
+    const atmosphereGeometry = new THREE.SphereGeometry(2.1, 64, 64);
+    const atmosphereMaterial = new THREE.MeshBasicMaterial({
+      color: 0x3399ff,
+      transparent: true,
+      opacity: 0.15,
+      side: THREE.BackSide,
+    });
+    const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+    scene.add(atmosphere);
+
+    // YILDIZ ARKA PLAN
+    const starsGeometry = new THREE.SphereGeometry(90, 64, 64);
+    const starsMaterial = new THREE.MeshBasicMaterial({
+      map: starsMap,
+      side: THREE.BackSide,
+    });
+    const stars = new THREE.Mesh(starsGeometry, starsMaterial);
+    scene.add(stars);
+
+    // KAMERA VE KONTROL
+    camera.position.z = 5;
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.enablePan = false;
+
+    // EKRAN BOYUTU DEĞİŞİNCE
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // ANİMASYON
+    function animate() {
+      requestAnimationFrame(animate);
+      earth.rotation.y += 0.0018;
+      earthNight.rotation.y += 0.0018;
+      clouds.rotation.y += 0.002;
+      stars.rotation.y += 0.0002;
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>
